@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>測地成果表｜終極穩定版</title>
+<style>
+*{box-sizing:border-box}
+body{font-family:Arial,"Microsoft JhengHei",sans-serif;background:#e9e9e9;margin:0;padding:10px;color:#111}
+.app{max-width:1050px;margin:auto}
+h1,h2{text-align:center;margin:10px 0}
+.panel{background:#fff;border:1px solid #999;padding:10px;margin-bottom:10px}
+.note{background:#fff8d7;border:1px solid #c7b85a;padding:8px;margin-bottom:10px;line-height:1.5}
+.grid2,.grid3,.grid4{display:grid;gap:8px;margin-bottom:8px}
+.grid2{grid-template-columns:repeat(2,1fr)}
+.grid3{grid-template-columns:repeat(3,1fr)}
+.grid4{grid-template-columns:repeat(4,1fr)}
+label{display:block;font-size:13px;margin-bottom:3px}
+input,textarea{width:100%;font-size:16px;padding:6px;text-align:center;border:1px solid #777;border-radius:3px;background:#fff}
+textarea{min-height:58px;text-align:left;resize:vertical}
+button{width:100%;padding:13px;font-size:19px;font-weight:bold;border:1px solid #333;border-radius:6px;background:#fff}
+button:active{background:#ddd}
+.canvasWrap{background:#888;padding:10px;overflow:auto}
+#sheetCanvas{display:block;background:#fff;margin:auto;max-width:100%;height:auto}
+@media(max-width:720px){.grid2,.grid3,.grid4{grid-template-columns:1fr}}
+</style>
+</head>
+
+<body>
+<div class="app">
+<h1>測地成果表產生器｜終極穩定版</h1>
+<div class="note">
+這版不靠外部套件，直接把成果表畫成固定 A4 圖片再存成 Word。<br>
+重點：表格不跑、照片不爆、儲存不產生垃圾檔。正式修改請在網頁輸入區改，Word 檔用來保存與列印。
+</div>
+
+<div class="panel">
+<h2>資料輸入</h2>
+
+<div class="grid2">
+<div><label>檔案編號</label><input id="fileNo" oninput="draw()"></div>
+<div><label>施測單位</label><input id="unit" value="101RGBHQ" oninput="draw()"></div>
+</div>
+
+<div class="grid3">
+<div><label>點名</label><input id="pointName" oninput="draw()"></div>
+<div><label>標示號碼</label><input id="markNo" oninput="draw()"></div>
+<div><label>標示種類</label><input id="markType" oninput="draw()"></div>
+</div>
+
+<div class="grid3">
+<div><label>五萬分一圖號</label><input id="map50No" oninput="draw()"></div>
+<div><label>二萬五千分一圖號</label><input id="map25No" oninput="draw()"></div>
+<div><label>施測日期</label><input id="surveyDate" oninput="draw()"></div>
+</div>
+
+<div class="grid2">
+<div><label>五萬分一圖名</label><input id="map50Name" oninput="draw()"></div>
+<div><label>二萬五千分一圖名</label><input id="map25Name" oninput="draw()"></div>
+</div>
+
+<div class="grid3">
+<div><label>經度</label><input id="lon" oninput="draw()"></div>
+<div><label>緯度</label><input id="lat" oninput="draw()"></div>
+<div><label>標高</label><input id="height" oninput="draw()"></div>
+</div>
+
+<div class="grid2">
+<div><label>橫坐標</label><input id="xcoord" oninput="draw()"></div>
+<div><label>縱坐標</label><input id="ycoord" oninput="draw()"></div>
+</div>
+
+<div class="grid4">
+<div><label>方位角 1</label><input id="az1" oninput="draw()"></div>
+<div><label>方位角 2</label><input id="az2" oninput="draw()"></div>
+<div><label>方位角 3</label><input id="az3" oninput="draw()"></div>
+<div><label>方位角 4</label><input id="az4" oninput="draw()"></div>
+</div>
+
+<div class="grid2">
+<div><label>決定方法 1</label><input id="method1" oninput="draw()"></div>
+<div><label>決定方法 2</label><input id="method2" oninput="draw()"></div>
+</div>
+
+<div class="grid2">
+<div><label>點位：</label><textarea id="detailPoint" oninput="draw()"></textarea></div>
+<div><label>方位基準點：</label><textarea id="detailBase" oninput="draw()"></textarea></div>
+</div>
+
+<div class="grid3">
+<div><label>點位略圖</label><input type="file" accept="image/*" onchange="loadPhoto(event,'siteSketch')"></div>
+<div><label>S1 照片</label><input type="file" accept="image/*" onchange="loadPhoto(event,'s1Photo')"></div>
+<div><label>S2 照片</label><input type="file" accept="image/*" onchange="loadPhoto(event,'s2Photo')"></div>
+<div><label>近照</label><input type="file" accept="image/*" onchange="loadPhoto(event,'nearPhoto')"></div>
+<div><label>遠照</label><input type="file" accept="image/*" onchange="loadPhoto(event,'farPhoto')"></div>
+</div>
+
+<h2>測量方式</h2>
+
+<div class="grid4">
+<div><label>已知點閉塞徑誤差</label><input id="knownErr" oninput="draw()"></div>
+<div><label>已知點精度比</label><input id="knownRatio" oninput="draw()"></div>
+<div><label>已知點標高閉塞差</label><input id="knownHeightErr" oninput="draw()"></div>
+<div><label>已知點方位閉塞差</label><input id="knownAzErr" oninput="draw()"></div>
+</div>
+
+<div class="grid4">
+<div><label>迴歸閉塞徑誤差</label><input id="returnErr" oninput="draw()"></div>
+<div><label>迴歸精度比</label><input id="returnRatio" oninput="draw()"></div>
+<div><label>迴歸標高閉塞差</label><input id="returnHeightErr" oninput="draw()"></div>
+<div><label>迴歸方位閉塞差</label><input id="returnAzErr" oninput="draw()"></div>
+</div>
+
+<div class="grid4">
+<div><label>三角閉塞徑誤差</label><input id="triErr" oninput="draw()"></div>
+<div><label>三角精度比</label><input id="triRatio" oninput="draw()"></div>
+<div><label>三角標高閉塞差</label><input id="triHeightErr" oninput="draw()"></div>
+<div><label>三角方位閉塞差</label><input id="triAzErr" oninput="draw()"></div>
+</div>
+
+<div class="grid4">
+<div><label>其他閉塞徑誤差</label><input id="otherErr" oninput="draw()"></div>
+<div><label>其他精度比</label><input id="otherRatio" oninput="draw()"></div>
+<div><label>其他標高閉塞差</label><input id="otherHeightErr" oninput="draw()"></div>
+<div><label>其他方位閉塞差</label><input id="otherAzErr" oninput="draw()"></div>
+</div>
+
+<div class="grid2">
+<div><label>定位定向閉塞徑誤差</label><input id="posErr" oninput="draw()"></div>
+<div><label>作業里程時間</label><input id="workTime" oninput="draw()"></div>
+<div><label>標高徑誤差</label><input id="posHeightErr" oninput="draw()"></div>
+<div><label>測量模式</label><input id="surveyMode" oninput="draw()"></div>
+</div>
+
+<div class="grid3">
+<div><label>起測點名</label><input id="startName" oninput="draw()"></div>
+<div><label>起測點號</label><input id="startNo" oninput="draw()"></div>
+<div><label>起測種類等級</label><input id="startType" oninput="draw()"></div>
+<div><label>閉塞點名</label><input id="endName" oninput="draw()"></div>
+<div><label>閉塞點號</label><input id="endNo" oninput="draw()"></div>
+<div><label>閉塞種類等級</label><input id="endType" oninput="draw()"></div>
+</div>
+</div>
+
+<div class="panel">
+<button onclick="downloadWord()">生成 Word 檔（穩定不跑版）</button>
+</div>
+
+<div class="panel">
+<h2>成果表預覽</h2>
+<div class="canvasWrap">
+<canvas id="sheetCanvas" width="1240" height="1754"></canvas>
+</div>
+</div>
+</div>
+
+<script>
+const canvas = document.getElementById("sheetCanvas");
+const ctx = canvas.getContext("2d");
+const photos = {};
+
+function v(id){
+  const el=document.getElementById(id);
+  return el ? el.value : "";
+}
+
+function loadPhoto(e,id){
+  const file=e.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    const img=new Image();
+    img.onload=()=>{
+      photos[id]=img;
+      draw();
+    };
+    img.src=reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function line(x1,y1,x2,y2,w=2){
+  ctx.lineWidth=w;
+  ctx.strokeStyle="#000";
+  ctx.beginPath();
+  ctx.moveTo(x1,y1);
+  ctx.lineTo(x2,y2);
+  ctx.stroke();
+}
+
+function rect(x,y,w,h,lw=2){
+  ctx.lineWidth=lw;
+  ctx.strokeStyle="#000";
+  ctx.strokeRect(x,y,w,h);
+}
+
+function fillText(text,x,y,w,h,opt={}){
+  ctx.save();
+  ctx.fillStyle="#000";
+  ctx.font=(opt.bold?"bold ":"")+(opt.size||24)+"px Microsoft JhengHei, Arial";
+  ctx.textAlign=opt.align||"center";
+  ctx.textBaseline="middle";
+  const str=(text||"").toString();
+  const maxChars=opt.maxChars||42;
+  let lines=[];
+  if(opt.wrap){
+    let s=str;
+    while(s.length>0){
+      lines.push(s.slice(0,maxChars));
+      s=s.slice(maxChars);
+      if(lines.length>=3)break;
+    }
+  }else{
+    lines=[str];
+  }
+  const lh=(opt.size||24)*1.25;
+  const total=(lines.length-1)*lh;
+  lines.forEach((ln,i)=>{
+    const yy=y+h/2-total/2+i*lh;
+    let xx=x+w/2;
+    if(opt.align==="left")xx=x+8;
+    if(opt.align==="right")xx=x+w-8;
+    ctx.fillText(ln,xx,yy);
+  });
+  ctx.restore();
+}
+
+function cell(x,y,w,h,text,opt={}){
+  rect(x,y,w,h,1.6);
+  fillText(text,x,y,w,h,opt);
+}
+
+function drawPhoto(id,x,y,w,h){
+  rect(x,y,w,h,1.2);
+  const img=photos[id];
+  if(img){
+    ctx.drawImage(img,x+2,y+2,w-4,h-4); // 強制拉伸填滿，不按原比例
+  }else{
+    ctx.save();
+    ctx.setLineDash([8,8]);
+    ctx.strokeStyle="#999";
+    ctx.lineWidth=1.5;
+    ctx.strokeRect(x+8,y+8,w-16,h-16);
+    ctx.restore();
+  }
+}
+
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle="#fff";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  const x0=55, W=1130;
+  let y=35;
+  const c=W/6;
+
+  // Top table
+  const h1=36,h=50;
+  cell(x0,y,c*4,h1,"陸軍步兵 101 旅砲兵營測地基準點成果表",{bold:true,size:20});
+  cell(x0+c*4,y,c,h1,"檔案編號",{size:18});
+  cell(x0+c*5,y,c,h1,v("fileNo"),{size:18});
+  y+=h1;
+
+  cell(x0,y,c,h,"點名",{size:18});
+  cell(x0+c,y,c*2,h,v("pointName"),{size:18});
+  cell(x0+c*3,y,c,h,"標示號碼",{size:18});
+  cell(x0+c*4,y,c,h,v("markNo"),{size:18});
+  cell(x0+c*5,y,c,h,"標示種類\n"+v("markType"),{size:16,wrap:true,maxChars:6});
+  y+=h;
+
+  cell(x0,y,c,h,"五萬分一圖號",{size:18});
+  cell(x0+c,y,c*2,h,v("map50No"),{size:18});
+  cell(x0+c*3,y,c,h,"二萬五千分一圖號",{size:16,wrap:true,maxChars:7});
+  cell(x0+c*4,y,c,h,v("map25No"),{size:18});
+  cell(x0+c*5,y,c,h,"施測日期\n"+v("surveyDate"),{size:16,wrap:true,maxChars:8});
+  y+=h;
+
+  cell(x0,y,c,h,"五萬分一圖名",{size:18});
+  cell(x0+c,y,c*2,h,v("map50Name"),{size:18});
+  cell(x0+c*3,y,c,h,"二萬五千分一圖名",{size:16,wrap:true,maxChars:7});
+  cell(x0+c*4,y,c,h,v("map25Name"),{size:18});
+  cell(x0+c*5,y,c,h,"施測單位\n"+v("unit"),{size:16,wrap:true,maxChars:8});
+  y+=h;
+
+  cell(x0,y,c,h*2,"座標\nWGS84\n6度分帶",{size:16,wrap:true,maxChars:6});
+  cell(x0+c,y,c,h,"經度",{size:18});
+  cell(x0+c*2,y,c,h,v("lon"),{size:18});
+  cell(x0+c*3,y,c,h,"緯度",{size:18});
+  cell(x0+c*4,y,c,h,v("lat"),{size:18});
+  cell(x0+c*5,y,c,h,"標高\n"+v("height"),{size:16,wrap:true,maxChars:8});
+  y+=h;
+
+  cell(x0+c,y,c,h,"橫坐標",{size:18});
+  cell(x0+c*2,y,c,h,v("xcoord"),{size:18});
+  cell(x0+c*3,y,c,h,"縱坐標",{size:18});
+  cell(x0+c*4,y,c,h,v("ycoord"),{size:18});
+  cell(x0+c*5,y,c,h,"",{size:18});
+  y+=h;
+
+  cell(x0,y,c*3,34,"方位基準點(1)",{size:18});
+  cell(x0+c*3,y,c*3,34,"方位基準點(2)",{size:18});
+  y+=34;
+
+  cell(x0,y,c,h,"方位角",{size:18});
+  cell(x0+c,y,c,h,v("az1"),{size:18});
+  cell(x0+c*2,y,c,h,v("az2"),{size:18});
+  cell(x0+c*3,y,c,h,"方位角",{size:18});
+  cell(x0+c*4,y,c,h,v("az3"),{size:18});
+  cell(x0+c*5,y,c,h,v("az4"),{size:18});
+  y+=h;
+
+  cell(x0,y,c,h,"決定方法",{size:18});
+  cell(x0+c,y,c*2,h,v("method1"),{size:18});
+  cell(x0+c*3,y,c,h,"決定方法",{size:18});
+  cell(x0+c*4,y,c*2,h,v("method2"),{size:18});
+  y+=h+8;
+
+  // Photo/detail table
+  const half=W/2;
+  const photoH=318;
+  const sH=150;
+
+  // Row 1 photo/details
+  rect(x0,y,half,photoH,1.6);
+  fillText("點位略圖",x0,y,half,30,{bold:true,size:18});
+  drawPhoto("siteSketch",x0+8,y+35,half-16,photoH-43);
+
+  rect(x0+half,y,half,photoH,1.6);
+  fillText("點位詳情",x0+half,y,half,30,{bold:true,size:18});
+  fillText("點位："+v("detailPoint"),x0+half+8,y+36,half-16,42,{align:"left",size:16,wrap:true,maxChars:26});
+  fillText("方位基準點："+v("detailBase"),x0+half+8,y+78,half-16,42,{align:"left",size:16,wrap:true,maxChars:24});
+  cell(x0+half+8,y+126,(half-16)/2,28,"S1",{bold:true,size:16});
+  cell(x0+half+8+(half-16)/2,y+126,(half-16)/2,28,"S2",{bold:true,size:16});
+  drawPhoto("s1Photo",x0+half+8,y+154,(half-16)/2,photoH-162);
+  drawPhoto("s2Photo",x0+half+8+(half-16)/2,y+154,(half-16)/2,photoH-162);
+  y+=photoH;
+
+  rect(x0,y,half,photoH,1.6);
+  fillText("近照",x0,y,half,30,{bold:true,size:18});
+  drawPhoto("nearPhoto",x0+8,y+35,half-16,photoH-43);
+  rect(x0+half,y,half,photoH,1.6);
+  fillText("遠照",x0+half,y,half,30,{bold:true,size:18});
+  drawPhoto("farPhoto",x0+half+8,y+35,half-16,photoH-43);
+  y+=photoH+8;
+
+  // Measurement table
+  const mW=W/5;
+  const mh=34;
+  cell(x0,y,mW,mh,"測量方式",{size:16});
+  cell(x0+mW,y,mW,mh,"閉塞徑誤差",{size:16});
+  cell(x0+mW*2,y,mW,mh,"精度比",{size:16});
+  cell(x0+mW*3,y,mW,mh,"標高閉塞差",{size:16});
+  cell(x0+mW*4,y,mW,mh,"方位閉塞差",{size:16});
+  y+=mh;
+  const rows=[
+    ["V　已知點閉塞導線","knownErr","knownRatio","knownHeightErr","knownAzErr"],
+    ["迴歸閉塞導線","returnErr","returnRatio","returnHeightErr","returnAzErr"],
+    ["三角測量","triErr","triRatio","triHeightErr","triAzErr"],
+    ["其他:","otherErr","otherRatio","otherHeightErr","otherAzErr"],
+  ];
+  rows.forEach(r=>{
+    cell(x0,y,mW,mh,r[0],{size:16});
+    cell(x0+mW,y,mW,mh,v(r[1]),{align:"right",size:16});
+    cell(x0+mW*2,y,mW,mh,v(r[2]),{align:"right",size:16});
+    cell(x0+mW*3,y,mW,mh,v(r[3]),{align:"right",size:16});
+    cell(x0+mW*4,y,mW,mh,v(r[4]),{align:"right",size:16});
+    y+=mh;
+  });
+  cell(x0,y,mW,mh,"定位定向系統",{size:16});
+  cell(x0+mW,y,mW,mh,"閉塞徑誤差",{size:16});
+  cell(x0+mW*2,y,mW,mh,v("posErr"),{align:"right",size:16});
+  cell(x0+mW*3,y,mW,mh,"作業里程(時間)",{size:16});
+  cell(x0+mW*4,y,mW,mh,v("workTime"),{align:"right",size:16});
+  y+=mh;
+  cell(x0,y,mW,mh,"",{size:16});
+  cell(x0+mW,y,mW,mh,"標高徑誤差",{size:16});
+  cell(x0+mW*2,y,mW,mh,v("posHeightErr"),{align:"right",size:16});
+  cell(x0+mW*3,y,mW,mh,"測量模式",{size:16});
+  cell(x0+mW*4,y,mW,mh,v("surveyMode"),{align:"right",size:16});
+  y+=mh+8;
+
+  // Bottom table
+  const bW=W/6;
+  ["起測點名","點號","種類等級","閉塞點名","點號","種類等級"].forEach((t,i)=>cell(x0+bW*i,y,bW,34,t,{size:16}));
+  y+=34;
+  [v("startName"),v("startNo"),v("startType"),v("endName"),v("endNo"),v("endType")].forEach((t,i)=>cell(x0+bW*i,y,bW,40,t,{align:"right",size:16}));
+  y+=55;
+  fillText("第1頁",x0,y,W,30,{size:18,bold:true});
+}
+
+function downloadWord(){
+  draw();
+  const data=canvas.toDataURL("image/jpeg",0.92);
+  const point=v("pointName").trim();
+  const fileName=point ? "測地成果表_"+point+".doc" : "測地成果表.doc";
+
+  const html = `
+  <html xmlns:o='urn:schemas-microsoft-com:office:office'
+        xmlns:w='urn:schemas-microsoft-com:office:word'
+        xmlns='http://www.w3.org/TR/REC-html40'>
+  <head>
+  <meta charset='utf-8'>
+  <style>
+  @page Section1 { size:21cm 29.7cm; margin:0cm; }
+  div.Section1 { page:Section1; }
+  body { margin:0; padding:0; }
+  img.page { width:21cm; height:29.7cm; display:block; margin:0; padding:0; }
+  </style>
+  </head>
+  <body>
+  <div class='Section1'>
+    <img class='page' src='${data}'>
+  </div>
+  </body>
+  </html>`;
+
+  const blob=new Blob(["\ufeff",html],{type:"application/msword"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download=fileName;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url)},1000);
+}
+
+draw();
+</script>
+</body>
+</html>
