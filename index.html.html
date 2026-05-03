@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>測地成果表穩定版</title>
+<style>
+*{box-sizing:border-box}
+body{font-family:Arial,"Microsoft JhengHei",sans-serif;background:#eee;margin:0;padding:10px}
+.app{max-width:1050px;margin:auto}
+h1,h2{text-align:center}
+.panel{background:#fff;border:1px solid #999;padding:10px;margin-bottom:10px}
+.grid2,.grid3,.grid4{display:grid;gap:8px;margin-bottom:8px}
+.grid2{grid-template-columns:repeat(2,1fr)}
+.grid3{grid-template-columns:repeat(3,1fr)}
+.grid4{grid-template-columns:repeat(4,1fr)}
+label{display:block;font-size:13px;margin-bottom:3px}
+input,textarea{width:100%;font-size:16px;padding:6px;text-align:center;border:1px solid #777}
+textarea{min-height:58px;text-align:left}
+button{width:100%;padding:12px;font-size:18px;font-weight:bold}
+.sheet-wrap{background:#888;padding:10px;overflow:auto}
+.sheet{width:210mm;min-height:297mm;background:white;margin:auto;padding:6mm}
+table.form{border-collapse:collapse;width:100%;table-layout:fixed;font-size:12px}
+.form td{border:1px solid #000;height:24px;text-align:center;vertical-align:middle;padding:2px;word-break:break-all}
+.title{font-weight:bold;font-size:16px}
+.left{text-align:left!important}
+.right{text-align:right!important}
+.photoBox{height:210px;border:1px dashed #999;overflow:hidden}
+.photoBox.small{height:105px}
+.photoBox img{width:100%;height:100%;object-fit:fill;display:block}
+.photoTitle{font-weight:bold;text-align:center}
+@media(max-width:720px){.grid2,.grid3,.grid4{grid-template-columns:1fr}.sheet{transform-origin:top left}}
+</style>
+</head>
+<body>
+<div class="app">
+<h1>測地成果表產生器｜WPS穩定版</h1>
+
+<div class="panel">
+<h2>資料輸入</h2>
+<div class="grid2">
+<div><label>檔案編號</label><input id="fileNo" oninput="sync()"></div>
+<div><label>施測單位</label><input id="unit" value="101RGBHQ" oninput="sync()"></div>
+</div>
+<div class="grid3">
+<div><label>點名</label><input id="pointName" oninput="sync()"></div>
+<div><label>標示號碼</label><input id="markNo" oninput="sync()"></div>
+<div><label>標示種類</label><input id="markType" oninput="sync()"></div>
+</div>
+<div class="grid3">
+<div><label>五萬分一圖號</label><input id="map50No" oninput="sync()"></div>
+<div><label>二萬五千分一圖號</label><input id="map25No" oninput="sync()"></div>
+<div><label>施測日期</label><input id="surveyDate" oninput="sync()"></div>
+</div>
+<div class="grid2">
+<div><label>五萬分一圖名</label><input id="map50Name" oninput="sync()"></div>
+<div><label>二萬五千分一圖名</label><input id="map25Name" oninput="sync()"></div>
+</div>
+<div class="grid3">
+<div><label>經度</label><input id="lon" oninput="sync()"></div>
+<div><label>緯度</label><input id="lat" oninput="sync()"></div>
+<div><label>標高</label><input id="height" oninput="sync()"></div>
+</div>
+<div class="grid2">
+<div><label>橫坐標</label><input id="x" oninput="sync()"></div>
+<div><label>縱坐標</label><input id="y" oninput="sync()"></div>
+</div>
+<div class="grid4">
+<div><label>方位角1</label><input id="az1" oninput="sync()"></div>
+<div><label>方位角2</label><input id="az2" oninput="sync()"></div>
+<div><label>方位角3</label><input id="az3" oninput="sync()"></div>
+<div><label>方位角4</label><input id="az4" oninput="sync()"></div>
+</div>
+<div class="grid2">
+<div><label>決定方法1</label><input id="method1" oninput="sync()"></div>
+<div><label>決定方法2</label><input id="method2" oninput="sync()"></div>
+</div>
+<div class="grid2">
+<div><label>點位：</label><textarea id="detailPoint" oninput="sync()"></textarea></div>
+<div><label>方位基準點：</label><textarea id="detailBase" oninput="sync()"></textarea></div>
+</div>
+<div class="grid3">
+<div><label>點位略圖</label><input type="file" accept="image/*" onchange="loadImg(event,'siteSketch')"></div>
+<div><label>S1照片</label><input type="file" accept="image/*" onchange="loadImg(event,'s1Photo')"></div>
+<div><label>S2照片</label><input type="file" accept="image/*" onchange="loadImg(event,'s2Photo')"></div>
+<div><label>近照</label><input type="file" accept="image/*" onchange="loadImg(event,'nearPhoto')"></div>
+<div><label>遠照</label><input type="file" accept="image/*" onchange="loadImg(event,'farPhoto')"></div>
+</div>
+
+<h2>測量方式</h2>
+<div class="grid4">
+<div><label>已知點閉塞徑誤差</label><input id="knownErr" oninput="sync()"></div>
+<div><label>已知點精度比</label><input id="knownRatio" oninput="sync()"></div>
+<div><label>已知點標高閉塞差</label><input id="knownHeightErr" oninput="sync()"></div>
+<div><label>已知點方位閉塞差</label><input id="knownAzErr" oninput="sync()"></div>
+</div>
+<div class="grid4">
+<div><label>迴歸閉塞徑誤差</label><input id="returnErr" oninput="sync()"></div>
+<div><label>迴歸精度比</label><input id="returnRatio" oninput="sync()"></div>
+<div><label>迴歸標高閉塞差</label><input id="returnHeightErr" oninput="sync()"></div>
+<div><label>迴歸方位閉塞差</label><input id="returnAzErr" oninput="sync()"></div>
+</div>
+<div class="grid4">
+<div><label>三角閉塞徑誤差</label><input id="triErr" oninput="sync()"></div>
+<div><label>三角精度比</label><input id="triRatio" oninput="sync()"></div>
+<div><label>三角標高閉塞差</label><input id="triHeightErr" oninput="sync()"></div>
+<div><label>三角方位閉塞差</label><input id="triAzErr" oninput="sync()"></div>
+</div>
+<div class="grid4">
+<div><label>其他閉塞徑誤差</label><input id="otherErr" oninput="sync()"></div>
+<div><label>其他精度比</label><input id="otherRatio" oninput="sync()"></div>
+<div><label>其他標高閉塞差</label><input id="otherHeightErr" oninput="sync()"></div>
+<div><label>其他方位閉塞差</label><input id="otherAzErr" oninput="sync()"></div>
+</div>
+<div class="grid2">
+<div><label>定位定向閉塞徑誤差</label><input id="posErr" oninput="sync()"></div>
+<div><label>作業里程時間</label><input id="workTime" oninput="sync()"></div>
+<div><label>標高徑誤差</label><input id="posHeightErr" oninput="sync()"></div>
+<div><label>測量模式</label><input id="surveyMode" oninput="sync()"></div>
+</div>
+<div class="grid3">
+<div><label>起測點名</label><input id="startName" oninput="sync()"></div>
+<div><label>起測點號</label><input id="startNo" oninput="sync()"></div>
+<div><label>起測種類等級</label><input id="startType" oninput="sync()"></div>
+<div><label>閉塞點名</label><input id="endName" oninput="sync()"></div>
+<div><label>閉塞點號</label><input id="endNo" oninput="sync()"></div>
+<div><label>閉塞種類等級</label><input id="endType" oninput="sync()"></div>
+</div>
+</div>
+
+<div class="panel"><button onclick="downloadWord()">生成 Word 檔（穩定 .doc）</button></div>
+
+<div class="panel">
+<h2>成果表預覽</h2>
+<div class="sheet-wrap">
+<div class="sheet" id="sheet">
+<table class="form">
+<colgroup><col style="width:16.66%"><col style="width:16.66%"><col style="width:16.66%"><col style="width:16.66%"><col style="width:16.66%"><col style="width:16.66%"></colgroup>
+<tr><td colspan="4" class="title">陸軍步兵 101 旅砲兵營測地基準點成果表</td><td>檔案編號</td><td data-field="fileNo"></td></tr>
+<tr><td>點名</td><td colspan="2" data-field="pointName"></td><td>標示號碼</td><td data-field="markNo"></td><td>標示種類<br><span data-field="markType"></span></td></tr>
+<tr><td>五萬分一圖號</td><td colspan="2" data-field="map50No"></td><td>二萬五千分一圖號</td><td data-field="map25No"></td><td>施測日期<br><span data-field="surveyDate"></span></td></tr>
+<tr><td>五萬分一圖名</td><td colspan="2" data-field="map50Name"></td><td>二萬五千分一圖名</td><td data-field="map25Name"></td><td>施測單位<br><span data-field="unit">101RGBHQ</span></td></tr>
+<tr><td rowspan="2">座標<br>WGS84<br>6度分帶</td><td>經度</td><td data-field="lon"></td><td>緯度</td><td data-field="lat"></td><td>標高<br><span data-field="height"></span></td></tr>
+<tr><td>橫坐標</td><td data-field="x"></td><td>縱坐標</td><td data-field="y"></td><td></td></tr>
+<tr><td colspan="3">方位基準點(1)</td><td colspan="3">方位基準點(2)</td></tr>
+<tr><td>方位角</td><td data-field="az1"></td><td data-field="az2"></td><td>方位角</td><td data-field="az3"></td><td data-field="az4"></td></tr>
+<tr><td>決定方法</td><td colspan="2" data-field="method1"></td><td>決定方法</td><td colspan="2" data-field="method2"></td></tr>
+</table>
+
+<table class="form" style="margin-top:5px">
+<tr>
+<td style="width:50%;vertical-align:top">
+<div class="photoTitle">點位略圖</div>
+<div class="photoBox"><img id="preview-siteSketch"></div>
+</td>
+<td style="width:50%;vertical-align:top">
+<div class="photoTitle">點位詳情</div>
+<div class="left">點位：<span data-field="detailPoint"></span></div>
+<div class="left">方位基準點：<span data-field="detailBase"></span></div>
+<table class="form"><tr><td>S1</td><td>S2</td></tr>
+<tr><td><div class="photoBox small"><img id="preview-s1Photo"></div></td><td><div class="photoBox small"><img id="preview-s2Photo"></div></td></tr></table>
+</td>
+</tr>
+<tr>
+<td><div class="photoTitle">近照</div><div class="photoBox"><img id="preview-nearPhoto"></div></td>
+<td><div class="photoTitle">遠照</div><div class="photoBox"><img id="preview-farPhoto"></div></td>
+</tr>
+</table>
+
+<table class="form" style="margin-top:5px">
+<tr><td>測量方式</td><td>閉塞徑誤差</td><td>精度比</td><td>標高閉塞差</td><td>方位閉塞差</td></tr>
+<tr><td>V　已知點閉塞導線</td><td class="right" data-field="knownErr"></td><td class="right" data-field="knownRatio"></td><td class="right" data-field="knownHeightErr"></td><td class="right" data-field="knownAzErr"></td></tr>
+<tr><td>迴歸閉塞導線</td><td class="right" data-field="returnErr"></td><td class="right" data-field="returnRatio"></td><td class="right" data-field="returnHeightErr"></td><td class="right" data-field="returnAzErr"></td></tr>
+<tr><td>三角測量</td><td class="right" data-field="triErr"></td><td class="right" data-field="triRatio"></td><td class="right" data-field="triHeightErr"></td><td class="right" data-field="triAzErr"></td></tr>
+<tr><td>其他:</td><td class="right" data-field="otherErr"></td><td class="right" data-field="otherRatio"></td><td class="right" data-field="otherHeightErr"></td><td class="right" data-field="otherAzErr"></td></tr>
+<tr><td>定位定向系統</td><td>閉塞徑誤差</td><td class="right" data-field="posErr"></td><td>作業里程(時間)</td><td class="right" data-field="workTime"></td></tr>
+<tr><td></td><td>標高徑誤差</td><td class="right" data-field="posHeightErr"></td><td>測量模式</td><td class="right" data-field="surveyMode"></td></tr>
+</table>
+
+<table class="form" style="margin-top:5px">
+<tr><td>起測點名</td><td>點號</td><td>種類等級</td><td>閉塞點名</td><td>點號</td><td>種類等級</td></tr>
+<tr><td class="right" data-field="startName"></td><td class="right" data-field="startNo"></td><td class="right" data-field="startType"></td><td class="right" data-field="endName"></td><td class="right" data-field="endNo"></td><td class="right" data-field="endType"></td></tr>
+</table>
+<div style="text-align:center;margin-top:8px">第1頁</div>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+const imageData={};
+function sync(){
+  document.querySelectorAll("[data-field]").forEach(el=>{
+    const input=document.getElementById(el.dataset.field);
+    if(input) el.textContent=input.value;
+  });
+}
+function loadImg(e,id){
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    imageData[id]=r.result;
+    document.getElementById("preview-"+id).src=r.result;
+  };
+  r.readAsDataURL(f);
+}
+function getWordHtml(){
+  const sheet=document.getElementById("sheet").cloneNode(true);
+  return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+@page Section1{size:21cm 29.7cm;margin:0.3cm}
+div.Section1{page:Section1}
+body{font-family:"Microsoft JhengHei",Arial;margin:0}
+table.form{border-collapse:collapse;width:100%;table-layout:fixed;font-size:10.5pt}
+.form td{border:1px solid #000;height:20pt;text-align:center;vertical-align:middle;padding:1pt;word-break:break-all}
+.title{font-weight:bold;font-size:13pt;text-align:center}
+.left{text-align:left!important}
+.right{text-align:right!important}
+.photoBox{height:150pt;border:1px dashed #999;overflow:hidden}
+.photoBox.small{height:78pt}
+.photoBox img{width:100%;height:100%;object-fit:fill;display:block}
+.photoTitle{font-weight:bold;text-align:center}
+</style>
+</head>
+<body><div class="Section1">${sheet.outerHTML}</div></body></html>`;
+}
+function downloadWord(){
+  const html=getWordHtml();
+  const blob=new Blob(["\ufeff",html],{type:"application/msword"});
+  const point=document.getElementById("pointName").value.trim();
+  const name=point?`測地成果表_${point}.doc`:"測地成果表.doc";
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url; a.download=name;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url)},1000);
+}
+sync();
+</script>
+</body>
+</html>
